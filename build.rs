@@ -2,6 +2,7 @@ extern crate gl_generator;
 
 use gl_generator::{Api, Fallbacks, GlobalGenerator, Profile, Registry};
 use std::fs::File;
+use std::path::Path;
 
 #[cfg(feature = "core")]
 const PROFILE: Profile = Profile::Core;
@@ -25,9 +26,13 @@ const API: Api = Api::Gl;
 fn main() {
     println!("cargo:rerun-if-env-changed=REGEN_GL");
 
-    let mut file = File::create("./src/lib.rs").unwrap();
+    let src_path = Path::new("./src");
+    if !src_path.exists() {
+        std::fs::create_dir(src_path).unwrap();
+    }
+    let mut out_file = File::create("./src/lib.rs").unwrap();
 
     Registry::new(API, VERSION, PROFILE, FALLBACKS, [])
-        .write_bindings(GlobalGenerator, &mut file)
+        .write_bindings(GlobalGenerator, &mut out_file)
         .unwrap();
 }
